@@ -17,7 +17,16 @@ import java.util.Stack;
  *
  * Esta clase se encarga de gestionar conexiones a la base de datos. Permite
  * reutilizar conexiones en lugar de crear una nueva cada vez que se necesita
- * una conexión a la base de datos.
+ * una conexión a la base de datos. Esta clase implementa el patrón Singleton
+ * para garantizar una única instancia del pool de conexiones.
+ *
+ * Primero se debe obtener una instancia de `Pool` utilizando el método
+ * getInstance()`. Luego, se puede llamar a los métodos `getConnection()` para
+ * obtener una conexión a la base de datos, `saveConnection(Connection
+ * connection)` para guardar la conexión en el pool y
+ * `closeConnection(Connection connection)` para cerrar una conexión y
+ * devolverla al pool.
+ *
  */
 public class Pool {
 
@@ -26,11 +35,16 @@ public class Pool {
     //Singleton para que haya una sola instancia del pool
     private static Pool instance = null;
 
-    // Constructor privado para evitar instanciación directa
+    //Constructor privado para evitar instanciación directa
     public Pool() {
         connections = new Stack();
     }
 
+    /**
+     * Obtiene la única instancia del pool de conexiones.
+     *
+     * @return La instancia del pool de conexiones.
+     */
     public static synchronized Pool getInstance() {
         if (instance == null) {
             instance = new Pool();
@@ -38,41 +52,54 @@ public class Pool {
         return instance;
     }
 
+    /**
+     * Obtiene una conexión a la base de datos desde el pool. Si el pool está
+     * vacío, se crea una nueva conexión.
+     *
+     * @return Una conexión a la base de datos.
+     * @throws SQLException Si se produce un error al obtener la conexión.
+     */
     public synchronized Connection getConnection() throws SQLException {
-        
+
         Connection connection = null;
-        
+
         if (connections.isEmpty()) {
-            
-        String URL = "jdbc:postgresql://192.168.20.59:8069/Produccion";
-        String USER = "tuUsuario";
-        String PASSWORD = "tuPassword";
-        
-        connection = DriverManager.getConnection(URL, USER, PASSWORD);
+
+            String URL = "jdbc:postgresql://192.168.20.59:8069/Produccion";
+            String USER = "tuUsuario";
+            String PASSWORD = "tuPassword";
+
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
 
         } else {
-            // Si la lista de connection no está vacía, obtiene una connection de la lista
             connection = connections.pop();
         }
         return connection;
     }
 
+    /**
+     * Guarda una conexión en el pool para su reutilización.
+     *
+     * @param connection La conexión que se guarda en el pool.
+     */
     public void saveConnection(Connection connection) {
-        //Guatrda la connection en la lista para volver a usarla
         connections.add(connection);
     }
 
+    /**
+     * Cierra una conexión y la devuelve al pool para su reutilización.
+     *
+     * @param connection La conexión a cerrar y devolver al pool.
+     */
     public void closeConnection(Connection connection) {
         if (connection != null) {
             try {
                 connection.close();
                 connections.add(connection);
             } catch (SQLException e) {
-                e.printStackTrace(); // Manejo de errores
+                e.printStackTrace();
             }
         }
     }
-
-  
 
 }

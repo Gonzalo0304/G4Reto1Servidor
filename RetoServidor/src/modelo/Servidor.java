@@ -5,44 +5,70 @@
  */
 package modelo;
 
+import clases.Mensaje;
+import clases.MessageEnum;
+import exceptions.CheckSignUpException;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
+ *
+ * La clase `Servidor` representa un servidor que se puede iniciar y apagar. Se
+ * utiliza junto con un `ExecutorService` para gestionar la ejecución de hilos.
+ * Permite iniciar y detener el servidor.
  *
  * @author Iñigo
  */
 public class Servidor {
-    
-    private ExecutorService threadPool;
-    
+
     private boolean isRunning;
     
-    public Servidor(ExecutorService threadPool){
-        
-        this.threadPool = threadPool;
+    private Socket skUsuario;
+
+    public Servidor(Socket skUsuario) {
+
         this.isRunning = false;
+        this.skUsuario = skUsuario;
         
     }
-    
-    public void start(){
+
+    public void start() {
         if (!isRunning) {
             isRunning = true;
-            System.out.println("El servidor ha iniciado");
-        } else {
-            System.out.println("El servidor ya está en unfionamiento");
-        }
-    }
-    
-    public void stop(){
-        
-        if(isRunning) {
+             Logger.getLogger("Se ha iniciado el servidor");
+             Mensaje mensaje = null;
             
-            System.out.println("Se ha apagado el servidor");   
+            if(mensaje.getMessageType().equals(MessageEnum.SIGNUP)){
+                try {
+                    DaoImplementation imple = Factoria.crearDaoBD();
+                    imple.insertUser(skUsuario);
+                } catch (CheckSignUpException ex) {
+                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            } 
+            
+             if(mensaje.getMessageType().equals(MessageEnum.SIGNIN)){
+                
+            } 
+            
         } else {
-            System.out.println("El servidor ya está apagado");
+             Logger.getLogger("El servidor ya está en funcionamiento");
         }
         
     }
-    
-    
+
+    public void stop() {
+
+        if (isRunning) {
+
+            Logger.getLogger("Se ha apagado el servidor");
+        } else {
+            Logger.getLogger("El servidor ya está apagado");
+        }
+
+    }
+
 }

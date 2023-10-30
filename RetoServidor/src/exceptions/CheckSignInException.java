@@ -3,12 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modelo;
+package exceptions;
 
 /**
  *
  * @author Iñigo
  */
-public enum TipoMensaje {
+public class CheckSignInException extends Exception {
+    
+     public CheckSignInException(String message) {
+        super(message);
+    }
     
 }

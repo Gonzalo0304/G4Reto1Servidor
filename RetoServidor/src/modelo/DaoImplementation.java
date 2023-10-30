@@ -5,12 +5,15 @@
  */
 package modelo;
 
+import exceptions.CheckSignUpException;
 import clases.MessageEnum;
 import static clases.MessageEnum.ERRORSIGNUP;
 import static clases.MessageEnum.SIGNIN;
 import static clases.MessageEnum.SIGNUP;
 import clases.Usuario;
 import static com.sun.javafx.scene.control.skin.FXVK.Type.EMAIL;
+import exceptions.CheckSignInException;
+import java.net.Socket;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -21,10 +24,18 @@ import java.util.logging.Logger;
 
 /**
  *
+ * La clase DaoImplementation es una implementación de la interfaz `Signable`
+ * que se utiliza para interactuar con una base de datos, gestionar la inserción
+ * de usuarios y la autenticación de usuarios en un sistema.
+ *
+ * Esta clase proporciona métodos para insertar usuarios en la base de datos,
+ * verificar el registro (signUp) y la autenticación (signIn) de usuarios, y
+ * gestionar las conexiones a la base de datos
+ *
  * @author Iñigo
  */
 public class DaoImplementation implements Signable {
-    //partner, user, resgroups, rescompany 
+
     final String INSETRESPARTNER = "INSERT INTO res_partner(create_date, name, create_uid, write_uid, street, zip, city, phone, active) VALUES(?,?,2,2,?,?,?,?,'true');";
     final String INSERTRESUSER = "INSERT INTO res_users(company_id, partner_id, create_date, login, password, create_uid, write_date, notification_type) VALUES(1,?,?,?,?,2,?,'email');";
     final String INSERTRESCOMP = "INSERT INTO res_company_user_rel (cid, user_id) VALUES (1,?);";
@@ -37,23 +48,35 @@ public class DaoImplementation implements Signable {
     private Pool connection = null;
     private Connection c;
     private PreparedStatement statement;
-    
+    private boolean errorCondition = false;
+
+
     /**
      *
-     * @param usuario
-     * @return
-     * @throws SQLException
+     * Inserta un nuevo usuario en el sistema.
+     *
+     * @param skUsuario
+     * @param usuario El objeto `Usuario` que representa al nuevo usuario a
+     * insertar.
+     * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
+     * la inserción.
+     * @throws exceptions.CheckSignUpException
+     * @throws SQLException * @throws SQLException Si se produce un error de
+     * base de datos durante la inserción.
      */
-    public MessageEnum insertUser(Usuario usuario) throws SQLException {
-        
+    @Override
+    public MessageEnum insertUser(Socket skUsuario) throws CheckSignUpException {
+
         connection = new Pool();
         Integer check;
         MessageEnum Order;
-        
+
         try {
             c = connection.getConnection();
-            check = checkSignUp(usuario);        
+            Usuario usuario = null;
+            check = checkSignUp(usuario);
             
+
             if (check == 0) {
                 statement = c.prepareStatement(INSETRESPARTNER);
                 statement.setDate(1, Date.valueOf(usuario.getCreacion()));
@@ -63,10 +86,10 @@ public class DaoImplementation implements Signable {
                 statement.setString(5, usuario.getDireccion());
                 statement.setInt(6, usuario.getTelefono());
                 statement.executeUpdate();
-                
+
                 ResultSet result = statement.executeQuery(SELECTRESPARTNERID);
                 int partnerId = result.getInt("id");
-                
+
                 statement = c.prepareStatement(INSERTRESUSER);
                 statement.setInt(1, partnerId);
                 statement.setDate(2, Date.valueOf(usuario.getCreacion()));
@@ -74,28 +97,30 @@ public class DaoImplementation implements Signable {
                 statement.setString(4, usuario.getPass());
                 statement.setDate(5, Date.valueOf(usuario.getCreacion()));
                 statement.executeUpdate();
-                
+
                 result = statement.executeQuery(SELECUSERID);
                 int userId = result.getInt("id");
-                
+
                 statement = c.prepareStatement(INSERTRESCOMP);
                 statement.setInt(1, userId);
                 statement.executeUpdate();
-                
+
                 statement = c.prepareStatement(INSERTRESGROUP);
                 statement.setInt(1, userId);
                 statement.setInt(2, userId);
                 statement.setInt(3, userId);
                 statement.setInt(4, userId);
-                                
+
                 statement.executeUpdate();
-                
+
                 connection.saveConnection(c);
                 return Order = SIGNUP;
+                
+                
             } else if (check == 1) {
                 connection.saveConnection(c);
-                return Order = ERRORSIGNUP;
-            } 
+                throw new CheckSignUpException();
+            }
             connection.saveConnection(c);
         } catch (SQLException ex) {
             connection.saveConnection(c);
@@ -104,75 +129,97 @@ public class DaoImplementation implements Signable {
         return null;
     }
 
-    private Integer checkSignUp(Usuario usuario) throws SQLException {
+    /**
+     * Verifica si un usuario ya está registrado en el sistema.
+     *
+     * @param usuario El objeto `Usuario` que se desea comprobar para ver si ya
+     * está registrado.
+     * @return Un entero que representa el estado de registro del usuario. 0 si
+     * no está registrado, 1 si ya lo está.
+     * @throws exceptions.CheckSignInException
+     * @throws SQLException Si se produce un error de base de datos durante la
+     * verificación.
+     */
+    @Override
+    public Integer checkSignUp(Usuario usuario) throws CheckSignUpException {
+        
         ResultSet resultset;
         Integer checkE = 0;
         
-        try{
+        try {
             statement = c.prepareStatement(SELECTEMAIL);
             statement.setString(1, usuario.getEmail());
             resultset = statement.executeQuery();
-            if(resultset.next()) {
-                return 1;   
+            if (resultset.next()) {
+                
+                
+                return 1;
             }
-            return checkE;
-            } catch (SQLException ex) {
             //Logger.getLogger(DaoImplementation.class.getEmail()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return checkE;
     }
-    return checkE;
-    }  
-    
+
+    /**
+     * Verifica si un usuario puede iniciar sesión en el sistema.
+     *
+     * @param usuario El objeto `Usuario` que intenta iniciar sesión.
+     * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
+     * la autenticación.
+     */
     public MessageEnum checkSignIn(Usuario usuario) {
         ResultSet resultset;
         String i;
         Boolean login = false;
         Boolean pass = false;
-        
+
         MessageEnum ORDER = null;
-        
+
         connection = new Pool();
-        
+
         try {
             c = connection.getConnection();
             statement = c.prepareStatement(SELECTEMAIL);
             statement.setString(1, usuario.getEmail());
             resultset = statement.executeQuery();
-            
-            if(resultset.next()) {
+
+            if (resultset.next()) {
                 i = resultset.getString("email");
                 if (i.equals(usuario.getEmail())) {
                     login = true;
                 }
             }
-            
+
             c = connection.getConnection();
             statement = c.prepareStatement(SELECTPASS);
             statement.setString(1, usuario.getPass());
             resultset = statement.executeQuery();
-            
-            if(resultset.next()) {
+
+            if (resultset.next()) {
                 i = resultset.getString("pass");
                 if (i.equals(usuario.getPass())) {
                     pass = true;
                 }
             }
-            
-            if(login == true && pass == true) {
+
+            if (login == true && pass == true) {
                 ORDER = MessageEnum.OK;
             }
-            
-            if(login == false || pass == false) {
+
+            if (login == false || pass == false) {
                 ORDER = MessageEnum.ERRORSIGNIN;
             }
-            connection.saveConnection(c);    
+            connection.saveConnection(c);
         } catch (SQLException ex) {
-            
-        connection.saveConnection(c);
+
+            connection.saveConnection(c);
             Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
         return ORDER;
     }
-    
+
     /*private String getEmail(Usuario usuario) {
         ResultSet resultset;
         String i = null;
@@ -189,8 +236,7 @@ public class DaoImplementation implements Signable {
         }
         return i;
     }*/
-    
-    /* private Integer countConnection(Integer id) {
+ /* private Integer countConnection(Integer id) {
         ResultSet resultset;
         Integer i = null;
         
@@ -207,6 +253,4 @@ public class DaoImplementation implements Signable {
         }
         return i;
     } */
-
-    
 }

@@ -3,12 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package controlador;
+package exceptions;
 
 /**
  *
  * @author Iñigo
  */
-public class OutputStream {
+public class CheckSignUpGmailException extends Exception {
+    
+      public CheckSignUpGmailException(String message) {
+        super(message);
+    }
+    
     
 }
