@@ -5,8 +5,11 @@
  */
 package modelo;
 
+import clases.Mensaje;
 import clases.MessageEnum;
+import clases.Usuario;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -21,9 +24,13 @@ import java.util.logging.Logger;
  * @author Iñigo
  */
 public class WorkerThread {
+    
 
-    private Socket socketUsuario;
-    MessageEnum MESSAGE;
+    private Socket socketUsuario = null;
+    private Usuario u = null;
+    private ObjectOutputStream ois = null;
+    private ObjectInputStream oos = null;
+    private Mensaje mensaje;
 
     /**
      * Constructor de la clase `WorkerThread`.
@@ -31,20 +38,39 @@ public class WorkerThread {
      * @param socketUsuario El socket a través del cual se enviará el mensaje.
      * @param MESSAGE El mensaje a enviar (representado por `MessageEnum`).
      */
-    WorkerThread(Socket socketUsuario, MessageEnum MESSAGE) {
+    WorkerThread(Socket socketUsuario, Mensaje mensaje) {
         this.socketUsuario = socketUsuario;
-        this.MESSAGE = MESSAGE;
+        this.mensaje = mensaje;
     }
 
     /**
      * Ejecuta el hilo. Envía el mensaje al cliente mediante el socket.
      */
+    @Override
     public void run() {
-        ObjectOutputStream out;
+        
+        int c = 0;
 
         try {
-            out = new ObjectOutputStream(socketUsuario.getOutputStream());
-            out.writeObject(MESSAGE);
+            ois = new ObjectOutputStream(socketUsuario.getOutputStream());
+            Factoria factoria = new Factoria();
+             = factoria.getServidor();
+            
+            encap = (Encapsulator ois.readObject());
+            
+            switch(encap.getMensaje()) {
+                case SIGN
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         } catch (IOException ex) {
             Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
         }

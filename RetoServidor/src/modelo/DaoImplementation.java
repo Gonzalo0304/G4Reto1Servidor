@@ -56,7 +56,7 @@ public class DaoImplementation implements Signable {
      * Inserta un nuevo usuario en el sistema.
      *
      * @param skUsuario
-     * @param usuario El objeto `Usuario` que representa al nuevo usuario a
+     * @param skUsuario El objeto `skUsuario` que representa al nuevo usuario a
      * insertar.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la inserción.
