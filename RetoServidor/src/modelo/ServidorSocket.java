@@ -8,6 +8,9 @@ package modelo;
 import clases.Mensaje;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -23,30 +26,39 @@ import java.util.logging.Logger;
  *
  * @author Iñigo
  */
-public class ServerSocket {
+public class ServidorSocket {
 
-    static final Integer PUERTO = Integer.parseInt(ResourceBundle.getBundle("clases.connection").getString("puerto"));
+    private Integer PUERTO = Integer.parseInt(ResourceBundle.getBundle("clases.conexion").getString("puerto"));
 
     /**
      * Crea una instancia de `ServerSocket` y ejecuta un servidor de sockets.
      */
-    public ServerSocket() {
-        java.net.ServerSocket skServidor = null;
+    public ServidorSocket() {
+        ObjectInputStream ois = null;
+        ObjectOutputStream oos = null;
+        ServerSocket skServidor = null;
         Socket skUsuario = null;
+        Mensaje msj = new Mensaje();
         
         try {
-
-            skServidor = new java.net.ServerSocket(PUERTO);
+            skServidor = new ServerSocket(PUERTO);
             Logger.getLogger("Escucho el puerto " + PUERTO);
             while (true) {
                 skUsuario = skServidor.accept();
-
-                Servidor hilo = new Servidor(skUsuario);
-                hilo.start();
+                ois = new ObjectInputStream(skUsuario.getInputStream());
+                msj = (Mensaje) ois.readObject();
+                
+                WorkerThread hilo = new WorkerThread(skUsuario, msj);
+                hilo.run();
+                
+                oos = new ObjectOutputStream(skUsuario.getOutputStream());
+                oos.writeObject(msj);
             }
 
         } catch (IOException ex) {
             Logger.getLogger(java.net.ServerSocket.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ServidorSocket.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 skServidor.close();
@@ -55,6 +67,10 @@ public class ServerSocket {
             }
 
         }
+    }
+
+    private ServidorSocket(Integer PUERTO) {
+        this.PUERTO=PUERTO;
     }
 
 }

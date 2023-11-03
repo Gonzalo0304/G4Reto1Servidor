@@ -5,6 +5,7 @@
  */
 package modelo;
 
+import clases.Mensaje;
 import clases.MessageEnum;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -23,7 +24,7 @@ import java.util.logging.Logger;
 public class WorkerThread {
 
     private Socket socketUsuario;
-    MessageEnum MESSAGE;
+    private Mensaje MESSAGE;
 
     /**
      * Constructor de la clase `WorkerThread`.
@@ -31,7 +32,7 @@ public class WorkerThread {
      * @param socketUsuario El socket a través del cual se enviará el mensaje.
      * @param MESSAGE El mensaje a enviar (representado por `MessageEnum`).
      */
-    WorkerThread(Socket socketUsuario, MessageEnum MESSAGE) {
+    WorkerThread(Socket socketUsuario, Mensaje MESSAGE) {
         this.socketUsuario = socketUsuario;
         this.MESSAGE = MESSAGE;
     }
@@ -41,6 +42,8 @@ public class WorkerThread {
      */
     public void run() {
         ObjectOutputStream out;
+        
+        
 
         try {
             out = new ObjectOutputStream(socketUsuario.getOutputStream());

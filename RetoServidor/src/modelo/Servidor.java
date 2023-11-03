@@ -37,10 +37,10 @@ public class Servidor {
     public void start() {
         if (!isRunning) {
             isRunning = true;
-             Logger.getLogger("Se ha iniciado el servidor");
-             Mensaje mensaje = null;
+            Logger.getLogger("Se ha iniciado el servidor");
+            Mensaje mensaje = null;
             
-            if(mensaje.getMessageType().equals(MessageEnum.SIGNUP)){
+            if(mensaje.getMessageEnum().equals(MessageEnum.SIGNUP)){
                 try {
                     DaoImplementation imple = Factoria.crearDaoBD();
                     imple.insertUser(skUsuario);
@@ -50,7 +50,7 @@ public class Servidor {
                 
             } 
             
-             if(mensaje.getMessageType().equals(MessageEnum.SIGNIN)){
+             if(mensaje.getMessageEnum().equals(MessageEnum.SIGNIN)){
                 
             } 
             
