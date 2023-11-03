@@ -39,4 +39,9 @@ public class Factoria {
       public static DaoImplementation crearDaoBD(){
         return new DaoImplementation();
     }
+      
+    public static Signable getDao(){
+        return new DaoImplementation();
+    } 
+     
 }

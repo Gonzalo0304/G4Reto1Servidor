@@ -5,6 +5,7 @@
  */
 package modelo;
 
+import clases.Mensaje;
 import exceptions.CheckSignUpException;
 import clases.MessageEnum;
 import clases.Usuario;
@@ -54,5 +55,5 @@ public interface Signable {
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la autenticación.
      */
-    public MessageEnum checkSignIn(Usuario usuario);
+    public Usuario checkSignIn(Usuario usuario);
 }

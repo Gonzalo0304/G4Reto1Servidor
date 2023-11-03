@@ -30,40 +30,17 @@ public class Servidor {
 
     private boolean isRunning;
 
-    private int numUsers = 0;
+    private static int numUsers = 0;
 
     final private Logger LOGGER = Logger.getLogger(ServerSocket.class.getName());
 
     final private int PORT = Integer.parseInt(ResourceBundle.getBundle("connection.properties").getString("port"));
     final private int MAXUSERS = Integer.parseInt(ResourceBundle.getBundle("connection.properties").getString("maxUsers"));
 
-    public void start() {
-        if (!isRunning) {
-            isRunning = true;
-            Logger.getLogger("Se ha iniciado el servidor");
-            Mensaje mensaje = null;
+   
+    
 
-            if (mensaje.getMessageType().equals(MessageEnum.SIGNUP)) {
-                try {
-                    DaoImplementation imple = Factoria.crearDaoBD();
-                    imple.insertUser(sk);
-                } catch (CheckSignUpException ex) {
-                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-
-            if (mensaje.getMessageType().equals(MessageEnum.SIGNIN)) {
-
-            }
-
-        } else {
-            Logger.getLogger("El servidor ya está en funcionamiento");
-        }
-
-    }
-
-    public void openServer() {
+    public void startServidor() {
         Socket skU = null;
         Servidor skS = null;
         ObjectOutputStream oos = null;
@@ -77,17 +54,12 @@ public class Servidor {
                 if (numUsers < MAXUSERS) {
                     skU = sk.accept();
                     LOGGER.info("Se ha conectado un usuario");
-                    ois = new ObjectInputStream(skU.getInputStream());
-
-                    Mensaje m = (Mensaje) ois.readObject();
-                    conectUser();
-
-                    WorkerThread workerThread = new WorkerThread(sk, m);
+                    
+                    WorkerThread workerThread = new WorkerThread();
                     workerThread.run();
-
-                    oos = new ObjectOutputStream(skU.getOutputStream());
-                    Mensaje mensaje = new Mensaje();
-                    disconnectUser();
+                    
+                    connectUser(workerThread);
+                    
                 } else {
                     oos = new ObjectOutputStream(skU.getOutputStream());
                     Mensaje mensaje = new Mensaje();
@@ -96,8 +68,6 @@ public class Servidor {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -113,12 +83,13 @@ public class Servidor {
 
     }
 
-    public synchronized void conectUser() {
+    public static synchronized void connectUser(WorkerThread workerThread) {
         numUsers++;
     }
 
-    public synchronized void disconnectUser() {
+    public static synchronized void disconnectUser(WorkerThread workerThread) {
         numUsers--;
     }
+    
 
 }

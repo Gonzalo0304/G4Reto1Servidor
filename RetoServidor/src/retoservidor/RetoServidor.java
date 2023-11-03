@@ -5,6 +5,8 @@
  */
 package retoservidor;
 
+import modelo.Servidor;
+
 /**
  *
  * @author Iñigo
@@ -16,6 +18,10 @@ public class RetoServidor {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        
+        Servidor servidor = new Servidor();
+        servidor.startServidor();
+        
     }
     
 }
