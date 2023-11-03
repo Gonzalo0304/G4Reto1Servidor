@@ -5,8 +5,7 @@
  */
 package retoservidor;
 
-import javafx.application.Application;
-import modelo.ServidorSocket;
+import modelo.Servidor;
 
 /**
  *
@@ -19,7 +18,10 @@ public class RetoServidor {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        new ServidorSocket();
+        
+        Servidor servidor = new Servidor();
+        servidor.startServidor();
+        
     }
     
 }

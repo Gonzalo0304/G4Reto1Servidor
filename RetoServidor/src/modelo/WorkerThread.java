@@ -7,7 +7,11 @@ package modelo;
 
 import clases.Mensaje;
 import clases.MessageEnum;
+import clases.Usuario;
+import exceptions.CheckSignUpException;
+import exceptions.ServerException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -21,10 +25,15 @@ import java.util.logging.Logger;
  *
  * @author Iñigo
  */
-public class WorkerThread {
+public class WorkerThread extends Thread {
+    
 
-    private Socket socketUsuario;
-    private Mensaje MESSAGE;
+    private Socket socketUsuario = null;
+    private Usuario u = null;
+    private ObjectOutputStream oos = null;
+    private ObjectInputStream ois = null;
+    private Mensaje mensaje;
+    private Signable s;
 
     /**
      * Constructor de la clase `WorkerThread`.
@@ -32,25 +41,72 @@ public class WorkerThread {
      * @param socketUsuario El socket a través del cual se enviará el mensaje.
      * @param MESSAGE El mensaje a enviar (representado por `MessageEnum`).
      */
-    WorkerThread(Socket socketUsuario, Mensaje MESSAGE) {
-        this.socketUsuario = socketUsuario;
-        this.MESSAGE = MESSAGE;
+    
+    public WorkerThread(){
+        
     }
-
+    
+    
+    public WorkerThread(Socket socketUsuario, Mensaje mensaje) {
+        this.socketUsuario = socketUsuario;
+        this.mensaje = mensaje;
+    }
+    
+    final private Logger LOGGER = Logger.getLogger(WorkerThread.class.getName());
+    
+    
     /**
      * Ejecuta el hilo. Envía el mensaje al cliente mediante el socket.
      */
+    @Override
     public void run() {
-        ObjectOutputStream out;
-        
-        
 
         try {
-            out = new ObjectOutputStream(socketUsuario.getOutputStream());
-            out.writeObject(MESSAGE);
-        } catch (IOException ex) {
-            Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+            ois = new ObjectInputStream(socketUsuario.getInputStream());
+            Factoria factoria = new Factoria();
+            s = factoria.getDao();
+            
+            mensaje = (Mensaje) ois.readObject();
+            
+            switch(mensaje.getMessageType()) {
+                case SIGNIN:
+                    LOGGER.info("El hilo ha recibido un sign in request");
+                    u = s.checkSignIn(mensaje.getUser());
+                    mensaje.setUser(u);
+                    mensaje.setMessageType(MessageEnum.OK);
+                    break;
+                    
+                case SIGNUP:
+                    LOGGER.info("SignUp request");
+                    
+                    s.checkSignUp(mensaje.getUser());
+                    mensaje.setUser(u);
+                    mensaje.setMessageType(MessageEnum.OK);
+                    break;
+            }
+            
+   } catch (IOException e) {
+       
+            mensaje.setMessageType(MessageEnum.ERROR);
+        } catch (ClassNotFoundException ex) {
+            mensaje.setMessageType(MessageEnum.ERROR);
+            mensaje.setMessageType(MessageEnum.ERRORSIGNIN);
+        } catch (CheckSignUpException ex) {
+            mensaje.setMessageType(MessageEnum.ERRORSIGNUP);
+        } finally {
+            try {
+                oos = new ObjectOutputStream(socketUsuario.getOutputStream());
+                oos.writeObject(mensaje);
+                Servidor.disconnectUser(this);
+                ois.close();
+                oos.close();
+                socketUsuario.close();
+            } catch (IOException ex) {
+                Logger.getLogger(WorkerThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
-    }
+
+}
 
 }

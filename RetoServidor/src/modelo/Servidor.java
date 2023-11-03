@@ -8,7 +8,12 @@ package modelo;
 import clases.Mensaje;
 import clases.MessageEnum;
 import exceptions.CheckSignUpException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,40 +29,47 @@ import java.util.logging.Logger;
 public class Servidor {
 
     private boolean isRunning;
+
+    private static int numUsers = 0;
+
+    final private Logger LOGGER = Logger.getLogger(ServerSocket.class.getName());
+
+    final private int PORT = Integer.parseInt(ResourceBundle.getBundle("connection.properties").getString("port"));
+    final private int MAXUSERS = Integer.parseInt(ResourceBundle.getBundle("connection.properties").getString("maxUsers"));
+
+   
     
-    private Socket skUsuario;
 
-    public Servidor(Socket skUsuario) {
+    public void startServidor() {
+        Socket skU = null;
+        Servidor skS = null;
+        ObjectOutputStream oos = null;
+        ObjectInputStream ois = null;
 
-        this.isRunning = false;
-        this.skUsuario = skUsuario;
-        
-    }
+        try {
+            LOGGER.info("El servidor empieza a funcionar");
+            ServerSocket sk = new ServerSocket(PORT);
 
-    public void start() {
-        if (!isRunning) {
-            isRunning = true;
-            Logger.getLogger("Se ha iniciado el servidor");
-            Mensaje mensaje = null;
-            
-            if(mensaje.getMessageEnum().equals(MessageEnum.SIGNUP)){
-                try {
-                    DaoImplementation imple = Factoria.crearDaoBD();
-                    imple.insertUser(skUsuario);
-                } catch (CheckSignUpException ex) {
-                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+            while (isRunning) {
+                if (numUsers < MAXUSERS) {
+                    skU = sk.accept();
+                    LOGGER.info("Se ha conectado un usuario");
+                    
+                    WorkerThread workerThread = new WorkerThread();
+                    workerThread.run();
+                    
+                    connectUser(workerThread);
+                    
+                } else {
+                    oos = new ObjectOutputStream(skU.getOutputStream());
+                    Mensaje mensaje = new Mensaje();
+                    mensaje.setMessageType(MessageEnum.MAXUSERS);
+                    oos.writeObject(mensaje);
                 }
-                
-            } 
-            
-             if(mensaje.getMessageEnum().equals(MessageEnum.SIGNIN)){
-                
-            } 
-            
-        } else {
-             Logger.getLogger("El servidor ya está en funcionamiento");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
 
     public void stop() {
@@ -70,5 +82,14 @@ public class Servidor {
         }
 
     }
+
+    public static synchronized void connectUser(WorkerThread workerThread) {
+        numUsers++;
+    }
+
+    public static synchronized void disconnectUser(WorkerThread workerThread) {
+        numUsers--;
+    }
+    
 
 }
