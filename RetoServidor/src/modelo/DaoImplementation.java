@@ -38,12 +38,12 @@ public class DaoImplementation implements Signable {
 
     final String INSETRESPARTNER = "INSERT INTO res_partner(create_date, name, create_uid, write_uid, street, zip, city, phone, active) VALUES(?,?,2,2,?,?,?,?,'true');";
     final String INSERTRESUSER = "INSERT INTO res_users(company_id, partner_id, create_date, login, password, create_uid, write_date, notification_type) VALUES(1,?,?,?,?,2,?,'email');";
-    final String INSERTRESCOMP = "INSERT INTO res_company_user_rel (cid, user_id) VALUES (1,?);";
-    final String INSERTRESGROUP = "INSERT INTO res_groups_users_rel {gid, uid} VALUES (16,?),(26,?),(28,?),(31,?);";
+    final String INSERTRESCOMP = "INSERT INTO res_company_users_rel (cid, user_id) VALUES (1,?);";
+    final String INSERTRESGROUP = "INSERT INTO res_groups_users_rel (gid, uid) VALUES (16,?),(26,?),(28,?),(31,?);";
     final String SELECTRESPARTNERID = "SELECT MAX(id) AS id FROM res_partner;";
     final String SELECUSERID = "SELECT MAX(id) AS id FROM res_users;";
-    final String SELECTEMAIL = "SELECT email FROM usuario WHERE email = ? GROUP BY email;";
-    final String SELECTPASS = "SELECT pass FROM usuario WHERE login = ? GROUP BY pass;";
+    final String SELECTEMAIL = "SELECT login FROM res_users WHERE login = ? GROUP BY login;";
+    final String SELECTPASS = "SELECT password FROM res_users WHERE login = ? GROUP BY password;";
 
     private Pool connection = null;
     private Connection c;
@@ -65,7 +65,7 @@ public class DaoImplementation implements Signable {
      * base de datos durante la inserción.
      */
     @Override
-    public MessageEnum insertUser(Socket skUsuario) throws CheckSignUpException {
+    public MessageEnum insertUser(Usuario usuario) throws CheckSignUpException {
 
         connection = new Pool();
         Integer check;
@@ -73,7 +73,7 @@ public class DaoImplementation implements Signable {
 
         try {
             c = connection.getConnection();
-            Usuario usuario = null;
+            
             check = checkSignUp(usuario);
             
 
@@ -87,8 +87,10 @@ public class DaoImplementation implements Signable {
                 statement.setInt(6, usuario.getTelefono());
                 statement.executeUpdate();
 
-                ResultSet result = statement.executeQuery(SELECTRESPARTNERID);
-                int partnerId = result.getInt("id");
+                statement = c.prepareStatement(SELECTRESPARTNERID);
+                ResultSet result = statement.executeQuery();
+                result.next();
+                Integer partnerId = result.getInt("id");
 
                 statement = c.prepareStatement(INSERTRESUSER);
                 statement.setInt(1, partnerId);
@@ -98,8 +100,10 @@ public class DaoImplementation implements Signable {
                 statement.setDate(5, Date.valueOf(usuario.getCreacion()));
                 statement.executeUpdate();
 
-                result = statement.executeQuery(SELECUSERID);
-                int userId = result.getInt("id");
+                statement = c.prepareStatement(SELECUSERID);
+                result = statement.executeQuery();
+                result.next();
+                Integer userId = result.getInt("id");
 
                 statement = c.prepareStatement(INSERTRESCOMP);
                 statement.setInt(1, userId);
@@ -114,7 +118,7 @@ public class DaoImplementation implements Signable {
                 statement.executeUpdate();
 
                 connection.saveConnection(c);
-                return Order = SIGNUP;
+                return MessageEnum.OK;
                 
                 
             } else if (check == 1) {
@@ -168,8 +172,10 @@ public class DaoImplementation implements Signable {
      * @param usuario El objeto `Usuario` que intenta iniciar sesión.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la autenticación.
+     * @throws exceptions.CheckSignInException
      */
-    public MessageEnum checkSignIn(Usuario usuario) {
+    @Override
+    public MessageEnum checkSignIn(Usuario usuario) throws  CheckSignInException{
         ResultSet resultset;
         String i;
         Boolean login = false;
@@ -186,7 +192,7 @@ public class DaoImplementation implements Signable {
             resultset = statement.executeQuery();
 
             if (resultset.next()) {
-                i = resultset.getString("email");
+                i = resultset.getString("login");                
                 if (i.equals(usuario.getEmail())) {
                     login = true;
                 }
@@ -194,11 +200,11 @@ public class DaoImplementation implements Signable {
 
             c = connection.getConnection();
             statement = c.prepareStatement(SELECTPASS);
-            statement.setString(1, usuario.getPass());
+            statement.setString(1, usuario.getEmail());
             resultset = statement.executeQuery();
 
             if (resultset.next()) {
-                i = resultset.getString("pass");
+                i = resultset.getString("password");
                 if (i.equals(usuario.getPass())) {
                     pass = true;
                 }
@@ -209,7 +215,7 @@ public class DaoImplementation implements Signable {
             }
 
             if (login == false || pass == false) {
-                ORDER = MessageEnum.ERRORSIGNIN;
+               throw new CheckSignInException();
             }
             connection.saveConnection(c);
         } catch (SQLException ex) {

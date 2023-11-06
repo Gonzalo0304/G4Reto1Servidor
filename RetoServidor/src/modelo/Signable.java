@@ -9,6 +9,7 @@ import clases.Mensaje;
 import exceptions.CheckSignUpException;
 import clases.MessageEnum;
 import clases.Usuario;
+import exceptions.CheckSignInException;
 import java.net.Socket;
 import java.sql.SQLException;
 
@@ -31,10 +32,10 @@ public interface Signable {
      * @param usuario El objeto Usuario que representa un nuevo usuario.
      * @return Un mensaje de estado (MessageEnum) que indica el resultado de la
      * inserción.
-     * @throws SQLException Si se produce un error de base de datos durante la
+     * @throws CheckSignUpException Si se produce un error de base de datos durante la
      * inserción.
      */
-    public MessageEnum insertUser(Socket skUsuario) throws CheckSignUpException;
+    public MessageEnum insertUser(Usuario usuario) throws CheckSignUpException;
 
     /**
      * Verifica si un usuario ya está registrado en el sistema.
@@ -43,7 +44,7 @@ public interface Signable {
      * está registrado.
      * @return Un valor entero que representa el estado de registro del usuario.
      * 0 si no está registrado, 1 si ya lo está.
-     * @throws SQLException Si se produce un error de base de datos durante la
+     * @throws CheckSignUpException Si se produce un error de base de datos durante la
      * verificación.
      */
     public Integer checkSignUp(Usuario usuario) throws CheckSignUpException;
@@ -54,6 +55,8 @@ public interface Signable {
      * @param usuario El objeto usuario que intenta iniciar sesión.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la autenticación.
+     * @throws exceptions.CheckSignInException  Si se produce un error de base de datos durante la
+     * verificación.
      */
-    public Usuario checkSignIn(Usuario usuario);
+    public MessageEnum checkSignIn(Usuario usuario)throws CheckSignInException;
 }

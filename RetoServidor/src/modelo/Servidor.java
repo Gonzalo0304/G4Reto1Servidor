@@ -28,21 +28,17 @@ import java.util.logging.Logger;
  */
 public class Servidor {
 
-    private boolean isRunning;
+    private boolean isRunning = true;
 
     private static int numUsers = 0;
 
     final private Logger LOGGER = Logger.getLogger(ServerSocket.class.getName());
 
-    final private int PORT = Integer.parseInt(ResourceBundle.getBundle("connection.properties").getString("port"));
-    final private int MAXUSERS = Integer.parseInt(ResourceBundle.getBundle("connection.properties").getString("maxUsers"));
-
-   
-    
+    final private int PORT = Integer.parseInt(ResourceBundle.getBundle("modelo.connection").getString("port"));
+    final private int MAXUSERS = Integer.parseInt(ResourceBundle.getBundle("modelo.connection").getString("maxUser"));
 
     public void startServidor() {
         Socket skU = null;
-        Servidor skS = null;
         ObjectOutputStream oos = null;
         ObjectInputStream ois = null;
 
@@ -55,7 +51,7 @@ public class Servidor {
                     skU = sk.accept();
                     LOGGER.info("Se ha conectado un usuario");
                     
-                    WorkerThread workerThread = new WorkerThread();
+                    WorkerThread workerThread = new WorkerThread(skU);
                     workerThread.run();
                     
                     connectUser(workerThread);
@@ -63,7 +59,7 @@ public class Servidor {
                 } else {
                     oos = new ObjectOutputStream(skU.getOutputStream());
                     Mensaje mensaje = new Mensaje();
-                    mensaje.setMessageType(MessageEnum.MAXUSERS);
+                    mensaje.setMessageEnum(MessageEnum.MAXUSERS);
                     oos.writeObject(mensaje);
                 }
             }
@@ -73,14 +69,11 @@ public class Servidor {
     }
 
     public void stop() {
-
         if (isRunning) {
-
             Logger.getLogger("Se ha apagado el servidor");
         } else {
             Logger.getLogger("El servidor ya está apagado");
         }
-
     }
 
     public static synchronized void connectUser(WorkerThread workerThread) {

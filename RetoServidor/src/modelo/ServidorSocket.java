@@ -48,7 +48,7 @@ public class ServidorSocket {
                 ois = new ObjectInputStream(skUsuario.getInputStream());
                 msj = (Mensaje) ois.readObject();
                 
-                WorkerThread hilo = new WorkerThread(skUsuario, msj);
+                WorkerThread hilo = new WorkerThread(skUsuario);
                 hilo.run();
                 
                 oos = new ObjectOutputStream(skUsuario.getOutputStream());

@@ -8,6 +8,7 @@ package modelo;
 import clases.Mensaje;
 import clases.MessageEnum;
 import clases.Usuario;
+import exceptions.CheckSignInException;
 import exceptions.CheckSignUpException;
 import exceptions.ServerException;
 import java.io.IOException;
@@ -28,8 +29,8 @@ import java.util.logging.Logger;
 public class WorkerThread extends Thread {
     
 
-    private Socket socketUsuario = null;
-    private Usuario u = null;
+    private Socket socketUsuario ;
+    private MessageEnum orden = null;
     private ObjectOutputStream oos = null;
     private ObjectInputStream ois = null;
     private Mensaje mensaje;
@@ -47,9 +48,9 @@ public class WorkerThread extends Thread {
     }
     
     
-    public WorkerThread(Socket socketUsuario, Mensaje mensaje) {
+    public WorkerThread(Socket socketUsuario) {
         this.socketUsuario = socketUsuario;
-        this.mensaje = mensaje;
+
     }
     
     final private Logger LOGGER = Logger.getLogger(WorkerThread.class.getName());
@@ -68,31 +69,30 @@ public class WorkerThread extends Thread {
             
             mensaje = (Mensaje) ois.readObject();
             
-            switch(mensaje.getMessageType()) {
+            switch(mensaje.getMessageEnum()) {
                 case SIGNIN:
                     LOGGER.info("El hilo ha recibido un sign in request");
-                    u = s.checkSignIn(mensaje.getUser());
-                    mensaje.setUser(u);
-                    mensaje.setMessageType(MessageEnum.OK);
+                    orden = s.checkSignIn(mensaje.getUser());
+                    mensaje.setMessageEnum(orden);
                     break;
                     
                 case SIGNUP:
-                    LOGGER.info("SignUp request");
-                    
-                    s.checkSignUp(mensaje.getUser());
-                    mensaje.setUser(u);
-                    mensaje.setMessageType(MessageEnum.OK);
+                    LOGGER.info("SignUp request");                    
+                    orden = s.insertUser(mensaje.getUser());
+                    mensaje.setMessageEnum(orden);
                     break;
             }
             
    } catch (IOException e) {
        
-            mensaje.setMessageType(MessageEnum.ERROR);
+            mensaje.setMessageEnum(MessageEnum.ERROR);
         } catch (ClassNotFoundException ex) {
-            mensaje.setMessageType(MessageEnum.ERROR);
-            mensaje.setMessageType(MessageEnum.ERRORSIGNIN);
+            mensaje.setMessageEnum(MessageEnum.ERROR);
+            mensaje.setMessageEnum(MessageEnum.ERRORSIGNIN);
         } catch (CheckSignUpException ex) {
-            mensaje.setMessageType(MessageEnum.ERRORSIGNUP);
+            mensaje.setMessageEnum(MessageEnum.ERRORSIGNUP);
+        } catch (CheckSignInException ex) {
+            mensaje.setMessageEnum(MessageEnum.ERRORSIGNIN);
         } finally {
             try {
                 oos = new ObjectOutputStream(socketUsuario.getOutputStream());

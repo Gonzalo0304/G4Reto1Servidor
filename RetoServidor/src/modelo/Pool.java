@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 import java.util.Stack;
 
 /**
@@ -65,9 +66,9 @@ public class Pool {
 
         if (connections.isEmpty()) {
 
-            String URL = "jdbc:postgresql://192.168.20.59:8069/Produccion";
-            String USER = "tuUsuario";
-            String PASSWORD = "tuPassword";
+            String URL = ResourceBundle.getBundle("modelo.connection").getString("CONNECTION");
+            String USER = ResourceBundle.getBundle("modelo.connection").getString("DBUSER");
+            String PASSWORD = ResourceBundle.getBundle("modelo.connection").getString("DBPASS");
 
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
 

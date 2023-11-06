@@ -14,5 +14,8 @@ public class CheckSignInException extends Exception {
      public CheckSignInException(String message) {
         super(message);
     }
+
+    public CheckSignInException() {
+    }
     
 }
