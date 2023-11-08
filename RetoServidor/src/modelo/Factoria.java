@@ -12,34 +12,45 @@ import java.util.concurrent.Executors;
  *
  * @author Iñigo
  *
- * Esta es la clase Factoria que se utiliza para crear instancias de Servidor.
+ * /**
+ * La clase Factoria es una fábrica que proporciona instancias de diferentes clases.
+ * En este caso, ofrece métodos para obtener instancias de clases relacionadas con la
+ * gestión de conexiones a servidores y bases de datos. Estos métodos estáticos permiten
+ * la creación de objetos de las clases correspondientes para su uso en la aplicación.
+ * La clase no contiene campos o lógica significativa, ya que se limita a proporcionar
+ * instancias de otras clases.
+ * 
  */
 public class Factoria {
 
     private ExecutorService threadPool;
 
-    /**
-     * Constructor de la clase Factoria. Inicializa el pool de hilos con un
-     * número máximo predefinido de hilos.
+     /**
+     * Obtiene una instancia de la clase "Servidor".
      *
-     * @param maxThreads El número máximo de hilos en el pool.
-     */
-
-
-    /**
-     * Obtiene una instancia de Servidor.
-     *
-     * @return Una instancia de Servidor configurada con el pool de hilos.
+     * @return Una instancia de la clase "Servidor" configurada con el hilo de ejecución.
      */
     public static Servidor getServidor() {
         //return new Servidor(threadPool);
         return null;
     }
     
+        
+    /**
+     * Crea y devuelve una instancia de la clase "DaoImplementation".
+     *
+     * @return Una instancia de la clase "DaoImplementation" que se utiliza para interactuar con la base de datos.
+     */
       public static DaoImplementation crearDaoBD(){
         return new DaoImplementation();
     }
-      
+    
+        
+    /**
+     * Obtiene una instancia de la interfaz "Signable" que se relaciona con la clase "DaoImplementation".
+     *
+     * @return Una instancia de la interfaz "Signable" que permite interactuar con la base de datos y realizar operaciones de registro e inicio de sesión.
+     */
     public static Signable getDao(){
         return new DaoImplementation();
     } 
