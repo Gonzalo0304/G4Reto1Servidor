@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Stack;
+import java.util.logging.Logger;
 
 /**
  *
@@ -35,6 +36,8 @@ public class Pool {
 
     //Singleton para que haya una sola instancia del pool
     private static Pool instance = null;
+    
+    private Logger LOOGER = Logger.getLogger(Pool.class.getName());
 
     //Constructor privado para evitar instanciación directa
     public Pool() {
@@ -65,7 +68,7 @@ public class Pool {
         Connection connection = null;
 
         if (connections.isEmpty()) {
-
+            LOOGER.info("Creando conexion");
             String URL = ResourceBundle.getBundle("modelo.connection").getString("CONNECTION");
             String USER = ResourceBundle.getBundle("modelo.connection").getString("DBUSER");
             String PASSWORD = ResourceBundle.getBundle("modelo.connection").getString("DBPASS");
@@ -73,6 +76,7 @@ public class Pool {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
 
         } else {
+            LOOGER.info("Asignando conexion");
             connection = connections.pop();
         }
         return connection;
@@ -84,6 +88,7 @@ public class Pool {
      * @param connection La conexión que se guarda en el pool.
      */
     public void saveConnection(Connection connection) {
+        LOOGER.info("Guardando conexion");
         connections.add(connection);
     }
 
@@ -95,6 +100,7 @@ public class Pool {
     public void closeConnection(Connection connection) {
         if (connection != null) {
             try {
+                LOOGER.info("Cerrando conexions");
                 connection.close();
                 connections.add(connection);
             } catch (SQLException e) {

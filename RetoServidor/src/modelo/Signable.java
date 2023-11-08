@@ -6,10 +6,10 @@
 package modelo;
 
 import clases.Mensaje;
-import exceptions.CheckSignUpException;
+import excepciones.CheckSignUpException;
 import clases.MessageEnum;
 import clases.Usuario;
-import exceptions.CheckSignInException;
+import excepciones.CheckSignInException;
 import java.net.Socket;
 import java.sql.SQLException;
 
@@ -55,7 +55,7 @@ public interface Signable {
      * @param usuario El objeto usuario que intenta iniciar sesión.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la autenticación.
-     * @throws exceptions.CheckSignInException  Si se produce un error de base de datos durante la
+     * @throws excepciones.CheckSignInException  Si se produce un error de base de datos durante la
      * verificación.
      */
     public MessageEnum checkSignIn(Usuario usuario)throws CheckSignInException;

@@ -5,11 +5,12 @@
  */
 package modelo;
 
+import clases.InterfaceClienteServidor;
 import clases.Mensaje;
 import clases.MessageEnum;
 import clases.Usuario;
-import exceptions.CheckSignInException;
-import exceptions.CheckSignUpException;
+import excepciones.CheckSignInException;
+import excepciones.CheckSignUpException;
 import exceptions.ServerException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -34,7 +35,7 @@ public class WorkerThread extends Thread {
     private ObjectOutputStream oos = null;
     private ObjectInputStream ois = null;
     private Mensaje mensaje;
-    private Signable s;
+    private InterfaceClienteServidor s;
 
     /**
      * Constructor de la clase `WorkerThread`.

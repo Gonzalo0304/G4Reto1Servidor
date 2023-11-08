@@ -5,8 +5,10 @@
  */
 package modelo;
 
+import clases.InterfaceClienteServidor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,7 +19,9 @@ import java.util.concurrent.Executors;
 public class Factoria {
 
     private ExecutorService threadPool;
+    private Logger LOGGER = Logger.getLogger(Factoria.class.getName());
 
+    
     /**
      * Constructor de la clase Factoria. Inicializa el pool de hilos con un
      * número máximo predefinido de hilos.
@@ -40,7 +44,7 @@ public class Factoria {
         return new DaoImplementation();
     }
       
-    public static Signable getDao(){
+    public static InterfaceClienteServidor getDao(){
         return new DaoImplementation();
     } 
      

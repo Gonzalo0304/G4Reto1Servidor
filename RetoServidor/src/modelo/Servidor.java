@@ -7,7 +7,7 @@ package modelo;
 
 import clases.Mensaje;
 import clases.MessageEnum;
-import exceptions.CheckSignUpException;
+import excepciones.CheckSignUpException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

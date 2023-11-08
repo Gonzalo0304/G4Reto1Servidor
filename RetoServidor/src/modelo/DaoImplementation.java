@@ -5,14 +5,16 @@
  */
 package modelo;
 
-import exceptions.CheckSignUpException;
+import clases.InterfaceClienteServidor;
+import clases.Mensaje;
+import excepciones.CheckSignUpException;
 import clases.MessageEnum;
 import static clases.MessageEnum.ERRORSIGNUP;
 import static clases.MessageEnum.SIGNIN;
 import static clases.MessageEnum.SIGNUP;
 import clases.Usuario;
 import static com.sun.javafx.scene.control.skin.FXVK.Type.EMAIL;
-import exceptions.CheckSignInException;
+import excepciones.CheckSignInException;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.Date;
@@ -34,7 +36,7 @@ import java.util.logging.Logger;
  *
  * @author Iñigo
  */
-public class DaoImplementation implements Signable {
+public class DaoImplementation implements InterfaceClienteServidor {
 
     final String INSETRESPARTNER = "INSERT INTO res_partner(create_date, name, create_uid, write_uid, street, zip, city, phone, active) VALUES(?,?,2,2,?,?,?,?,'true');";
     final String INSERTRESUSER = "INSERT INTO res_users(company_id, partner_id, create_date, login, password, create_uid, write_date, notification_type) VALUES(1,?,?,?,?,2,?,'email');";
@@ -45,11 +47,11 @@ public class DaoImplementation implements Signable {
     final String SELECTEMAIL = "SELECT login FROM res_users WHERE login = ? GROUP BY login;";
     final String SELECTPASS = "SELECT password FROM res_users WHERE login = ? GROUP BY password;";
 
+    private Logger LOGGER = Logger.getLogger(DaoImplementation.class.getName());
     private Pool connection = null;
     private Connection c;
     private PreparedStatement statement;
     private boolean errorCondition = false;
-
 
     /**
      *
@@ -60,7 +62,7 @@ public class DaoImplementation implements Signable {
      * insertar.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la inserción.
-     * @throws exceptions.CheckSignUpException
+     * @throws excepciones.CheckSignUpException
      * @throws SQLException * @throws SQLException Si se produce un error de
      * base de datos durante la inserción.
      */
@@ -73,9 +75,8 @@ public class DaoImplementation implements Signable {
 
         try {
             c = connection.getConnection();
-            
+
             check = checkSignUp(usuario);
-            
 
             if (check == 0) {
                 statement = c.prepareStatement(INSETRESPARTNER);
@@ -87,6 +88,7 @@ public class DaoImplementation implements Signable {
                 statement.setInt(6, usuario.getTelefono());
                 statement.executeUpdate();
 
+                LOGGER.info("Usuario introducido en la tabla res_partner");
                 statement = c.prepareStatement(SELECTRESPARTNERID);
                 ResultSet result = statement.executeQuery();
                 result.next();
@@ -99,6 +101,7 @@ public class DaoImplementation implements Signable {
                 statement.setString(4, usuario.getPass());
                 statement.setDate(5, Date.valueOf(usuario.getCreacion()));
                 statement.executeUpdate();
+                LOGGER.info("Usuario introducido en la tabla res_user");
 
                 statement = c.prepareStatement(SELECUSERID);
                 result = statement.executeQuery();
@@ -108,19 +111,19 @@ public class DaoImplementation implements Signable {
                 statement = c.prepareStatement(INSERTRESCOMP);
                 statement.setInt(1, userId);
                 statement.executeUpdate();
+                LOGGER.info("Usuario introducido en la tabla res_company_users_rel");
 
                 statement = c.prepareStatement(INSERTRESGROUP);
                 statement.setInt(1, userId);
                 statement.setInt(2, userId);
                 statement.setInt(3, userId);
                 statement.setInt(4, userId);
-
                 statement.executeUpdate();
+                LOGGER.info("Usuario introducido en la tabla res_groups_users_rel");
 
                 connection.saveConnection(c);
                 return MessageEnum.OK;
-                
-                
+
             } else if (check == 1) {
                 connection.saveConnection(c);
                 throw new CheckSignUpException();
@@ -140,29 +143,31 @@ public class DaoImplementation implements Signable {
      * está registrado.
      * @return Un entero que representa el estado de registro del usuario. 0 si
      * no está registrado, 1 si ya lo está.
-     * @throws exceptions.CheckSignInException
+     * @throws excepciones.CheckSignInException
      * @throws SQLException Si se produce un error de base de datos durante la
      * verificación.
      */
     @Override
     public Integer checkSignUp(Usuario usuario) throws CheckSignUpException {
-        
+
         ResultSet resultset;
         Integer checkE = 0;
-        
+
         try {
             statement = c.prepareStatement(SELECTEMAIL);
             statement.setString(1, usuario.getEmail());
             resultset = statement.executeQuery();
             if (resultset.next()) {
-                
-                
+                LOGGER.info("El usuario introducido no existe se procedera a introducirlo en las tablas correspondientes");
+
                 return 1;
             }
             //Logger.getLogger(DaoImplementation.class.getEmail()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
             Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
         }
+        LOGGER.info("El usuario introducido ya existe se procedera a cancelar el registro");
+
         return checkE;
     }
 
@@ -172,10 +177,10 @@ public class DaoImplementation implements Signable {
      * @param usuario El objeto `Usuario` que intenta iniciar sesión.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la autenticación.
-     * @throws exceptions.CheckSignInException
+     * @throws excepciones.CheckSignInException
      */
     @Override
-    public MessageEnum checkSignIn(Usuario usuario) throws  CheckSignInException{
+    public MessageEnum checkSignIn(Usuario usuario) throws CheckSignInException {
         ResultSet resultset;
         String i;
         Boolean login = false;
@@ -192,9 +197,11 @@ public class DaoImplementation implements Signable {
             resultset = statement.executeQuery();
 
             if (resultset.next()) {
-                i = resultset.getString("login");                
+                i = resultset.getString("login");
                 if (i.equals(usuario.getEmail())) {
                     login = true;
+                    LOGGER.info("El usuario introducido coincide con uno existente");
+
                 }
             }
 
@@ -207,6 +214,7 @@ public class DaoImplementation implements Signable {
                 i = resultset.getString("password");
                 if (i.equals(usuario.getPass())) {
                     pass = true;
+                    LOGGER.info("La contraseña del usuario coincide con la del usuari introducido");
                 }
             }
 
@@ -215,7 +223,7 @@ public class DaoImplementation implements Signable {
             }
 
             if (login == false || pass == false) {
-               throw new CheckSignInException();
+                throw new CheckSignInException();
             }
             connection.saveConnection(c);
         } catch (SQLException ex) {
@@ -226,37 +234,18 @@ public class DaoImplementation implements Signable {
         return ORDER;
     }
 
-    /*private String getEmail(Usuario usuario) {
-        ResultSet resultset;
-        String i = null;
-        try {
-            statement = c.prepareStatement(SELECTEMAIL);
-            statement.setString(1, usuario.getEmail());
-            resultset = statement.executeQuery();
-            
-            if(resultset.next()) {
-                i = statement.getString("id");
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DaoImplementation.class.getName().log(Level.SEVERE, null, ex));
-        }
-        return i;
-    }*/
- /* private Integer countConnection(Integer id) {
-        ResultSet resultset;
-        Integer i = null;
-        
-        try{
-            statement = c.prepareStatement(SELECTCOUNTID);
-            statement.setInt(1, id);
-            resultset = statement.executeQuery();
-            
-            if(resultset.next()){
-                i = resultset.getInt("num");
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(DaoImplementation.class.getName().log(Level.SEVERE, null, ex));
-        }
-        return i;
-    } */
+    @Override
+    public Mensaje signIn(Mensaje respuesta) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Mensaje signUp(Mensaje respuesta) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void closeApli() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
