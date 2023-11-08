@@ -26,13 +26,9 @@ import java.util.logging.Logger;
 
 /**
  *
- * La clase DaoImplementation es una implementación de la interfaz `Signable`
- * que se utiliza para interactuar con una base de datos, gestionar la inserción
- * de usuarios y la autenticación de usuarios en un sistema.
- *
- * Esta clase proporciona métodos para insertar usuarios en la base de datos,
- * verificar el registro (signUp) y la autenticación (signIn) de usuarios, y
- * gestionar las conexiones a la base de datos
+ * Esta clase se encarga de insertar nuevos usuarios en la base de datos,
+ * verificar la existencia de un correo electrónico en el proceso de registro y
+ * comprobar las credenciales de inicio de sesión.
  *
  * @author Iñigo
  */
@@ -54,6 +50,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
     private boolean errorCondition = false;
 
     /**
+     * Inserta un nuevo usuario en la base de datos.
      *
      * Inserta un nuevo usuario en el sistema.
      *
@@ -69,12 +66,12 @@ public class DaoImplementation implements InterfaceClienteServidor {
     @Override
     public MessageEnum insertUser(Usuario usuario) throws CheckSignUpException {
 
-        connection = new Pool();
         Integer check;
         MessageEnum Order;
 
         try {
-            c = connection.getConnection();
+            c.setAutoCommit(false);
+            c = Pool.getConnection();
 
             check = checkSignUp(usuario);
 
@@ -121,23 +118,25 @@ public class DaoImplementation implements InterfaceClienteServidor {
                 statement.executeUpdate();
                 LOGGER.info("Usuario introducido en la tabla res_groups_users_rel");
 
-                connection.saveConnection(c);
+                c.commit();
                 return MessageEnum.OK;
 
             } else if (check == 1) {
-                connection.saveConnection(c);
+                c.rollback();
                 throw new CheckSignUpException();
             }
-            connection.saveConnection(c);
+
         } catch (SQLException ex) {
-            connection.saveConnection(c);
             Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            Pool.saveConnection(c);
         }
         return null;
     }
 
     /**
-     * Verifica si un usuario ya está registrado en el sistema.
+     * Verifica si un correo electrónico ya existe en la base de datos durante
+     * el proceso de registro.
      *
      * @param usuario El objeto `Usuario` que se desea comprobar para ver si ya
      * está registrado.
@@ -172,7 +171,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
     }
 
     /**
-     * Verifica si un usuario puede iniciar sesión en el sistema.
+     * Verifica las credenciales de inicio de sesión de un usuario.
      *
      * @param usuario El objeto `Usuario` que intenta iniciar sesión.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
@@ -188,10 +187,8 @@ public class DaoImplementation implements InterfaceClienteServidor {
 
         MessageEnum ORDER = null;
 
-        connection = new Pool();
-
         try {
-            c = connection.getConnection();
+            c = Pool.getConnection();
             statement = c.prepareStatement(SELECTEMAIL);
             statement.setString(1, usuario.getEmail());
             resultset = statement.executeQuery();
@@ -205,7 +202,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
                 }
             }
 
-            c = connection.getConnection();
+            c = Pool.getConnection();
             statement = c.prepareStatement(SELECTPASS);
             statement.setString(1, usuario.getEmail());
             resultset = statement.executeQuery();
@@ -225,11 +222,10 @@ public class DaoImplementation implements InterfaceClienteServidor {
             if (login == false || pass == false) {
                 throw new CheckSignInException();
             }
-            connection.saveConnection(c);
         } catch (SQLException ex) {
-
-            connection.saveConnection(c);
             Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            Pool.saveConnection(c);
         }
         return ORDER;
     }

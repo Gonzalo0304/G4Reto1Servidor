@@ -17,22 +17,18 @@ import java.util.logging.Logger;
  *
  * @author Iñigo
  *
- * Esta clase se encarga de gestionar conexiones a la base de datos. Permite
- * reutilizar conexiones en lugar de crear una nueva cada vez que se necesita
- * una conexión a la base de datos. Esta clase implementa el patrón Singleton
- * para garantizar una única instancia del pool de conexiones.
+ * Esta clase representa un pool de conexiones a una base de datos. Se utiliza
+ * para gestionar las conexiones y reutilizarlas en lugar de crear una nueva
+ * conexión cada vez que se necesita interactuar con la base de datos.
  *
- * Primero se debe obtener una instancia de `Pool` utilizando el método
- * getInstance()`. Luego, se puede llamar a los métodos `getConnection()` para
- * obtener una conexión a la base de datos, `saveConnection(Connection
- * connection)` para guardar la conexión en el pool y
- * `closeConnection(Connection connection)` para cerrar una conexión y
- * devolverla al pool.
+ * El pool de conexiones sigue un patrón Singleton, lo que significa que solo
+ * puede haber una instancia de esta clase. El pool mantiene una pila de
+ * conexiones disponibles y las asigna a las solicitudes según sea necesario.
  *
  */
 public class Pool {
 
-    private static Stack<Connection> connections = null;
+    private static Stack<Connection> connections = new Stack();
 
     //Singleton para que haya una sola instancia del pool
     private static Pool instance = null;
@@ -40,30 +36,27 @@ public class Pool {
     private Logger LOOGER = Logger.getLogger(Pool.class.getName());
 
     //Constructor privado para evitar instanciación directa
-    public Pool() {
-        connections = new Stack();
-    }
-
     /**
-     * Obtiene la única instancia del pool de conexiones.
+     * Obtiene la instancia única del pool de conexiones. Si no existe una
+     * instancia, crea una nueva.
      *
-     * @return La instancia del pool de conexiones.
+     * @return La instancia única del pool de conexiones.
      */
-    public static synchronized Pool getInstance() {
-        if (instance == null) {
-            instance = new Pool();
-        }
-        return instance;
-    }
-
+//    public static synchronized Pool getInstance() {
+//        if (instance == null) {
+//            instance = new Pool();
+//        }
+//        return instance;
+//    }
     /**
-     * Obtiene una conexión a la base de datos desde el pool. Si el pool está
-     * vacío, se crea una nueva conexión.
+     * Obtiene una conexión de la base de datos. Si hay conexiones disponibles
+     * en el pool, se reutiliza una de ellas; de lo contrario, se crea una nueva
+     * conexión.
      *
-     * @return Una conexión a la base de datos.
-     * @throws SQLException Si se produce un error al obtener la conexión.
+     * @return Una conexión activa a la base de datos.
+     * @throws SQLException Si se produce un error al establecer la conexión.
      */
-    public synchronized Connection getConnection() throws SQLException {
+    public static synchronized Connection getConnection() throws SQLException {
 
         Connection connection = null;
 
@@ -83,9 +76,10 @@ public class Pool {
     }
 
     /**
-     * Guarda una conexión en el pool para su reutilización.
+     * Devuelve una conexión al pool de conexiones para su posterior
+     * reutilización.
      *
-     * @param connection La conexión que se guarda en el pool.
+     * @param connection La conexión que se desea guardar en el pool.
      */
     public void saveConnection(Connection connection) {
         LOOGER.info("Guardando conexion");
@@ -93,11 +87,12 @@ public class Pool {
     }
 
     /**
-     * Cierra una conexión y la devuelve al pool para su reutilización.
+     * Cierra una conexión y la añade nuevamente al pool de conexiones.
      *
-     * @param connection La conexión a cerrar y devolver al pool.
+     * @param connection La conexión que se debe cerrar y añadir de nuevo al
+     * pool.
      */
-    public void closeConnection(Connection connection) {
+    public static void closeConnection(Connection connection) {
         if (connection != null) {
             try {
                 LOOGER.info("Cerrando conexions");

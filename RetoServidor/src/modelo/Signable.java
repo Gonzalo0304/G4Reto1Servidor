@@ -15,42 +15,35 @@ import java.sql.SQLException;
 
 /**
  *
- * Esta interfaz define operaciones relacionadas con la gestión de usuarios y la
- * autenticación en la App. Proporciona una estructura para la inserción de
- * usuarios, la comprobación de registro (signUp) y la comprobación de inicio de
- * sesión (signIn). Implementar esta interfaz permite a los desarrolladores
- * personalizar la lógica de autenticación de acuerdo a los requisitos
- * específicos del sistema.
- *
+ * Esta interfaz define métodos para la autenticación y registro de usuarios en el sistema.
+ * 
  * @author Iñigo
  */
 public interface Signable {
 
     /**
-     * Inserta un nuevo usuario en el sistema.
+     * Registra un nuevo usuario en el sistema.
      *
-     * @param usuario El objeto Usuario que representa un nuevo usuario.
-     * @return Un mensaje de estado (MessageEnum) que indica el resultado de la
-     * inserción.
-     * @throws CheckSignUpException Si se produce un error de base de datos durante la
-     * inserción.
+     * @param usuario El objeto Usuario que contiene los datos del usuario a registrar.
+     * @return Un valor de la enumeración MessageEnum que indica el resultado del registro.
+     * @throws CheckSignUpException Si ocurren errores durante el proceso de registro.
      */
     public MessageEnum insertUser(Usuario usuario) throws CheckSignUpException;
 
+   
     /**
-     * Verifica si un usuario ya está registrado en el sistema.
+     * Comprueba si un correo electrónico ya está registrado en el sistema.
      *
-     * @param usuario El objeto `Usuario` que se desea comprobar para ver si ya
-     * está registrado.
-     * @return Un valor entero que representa el estado de registro del usuario.
-     * 0 si no está registrado, 1 si ya lo está.
-     * @throws CheckSignUpException Si se produce un error de base de datos durante la
-     * verificación.
+     * @param usuario El objeto Usuario que contiene el correo electrónico a verificar.
+     * @return Un entero que indica el resultado de la comprobación:
+     *         - 0 si el correo electrónico no está registrado en el sistema.
+     *         - 1 si el correo electrónico ya está registrado en el sistema.
+     * @throws CheckSignUpException Si ocurren errores durante la comprobación.
      */
     public Integer checkSignUp(Usuario usuario) throws CheckSignUpException;
 
-    /**
-     * Verifica si un usuario puede iniciar sesión en el sistema.
+     /**
+     * Autentica a un usuario en el sistema.
      *
      * @param usuario El objeto usuario que intenta iniciar sesión.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
