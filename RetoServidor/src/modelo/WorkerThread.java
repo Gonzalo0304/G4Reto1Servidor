@@ -8,10 +8,8 @@ package modelo;
 import clases.InterfaceClienteServidor;
 import clases.Mensaje;
 import clases.MessageEnum;
-import clases.Usuario;
 import excepciones.CheckSignInException;
 import excepciones.CheckSignUpException;
-import exceptions.ServerException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -91,6 +89,7 @@ public class WorkerThread extends Thread {
                 oos.writeObject(mensaje);
                 Servidor.disconnectUser(this);
                 ois.close();
+                oos.flush();
                 oos.close();
                 socketUsuario.close();
             } catch (IOException ex) {

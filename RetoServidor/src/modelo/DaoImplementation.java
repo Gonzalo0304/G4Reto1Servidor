@@ -9,13 +9,8 @@ import clases.InterfaceClienteServidor;
 import clases.Mensaje;
 import excepciones.CheckSignUpException;
 import clases.MessageEnum;
-import static clases.MessageEnum.ERRORSIGNUP;
-import static clases.MessageEnum.SIGNIN;
-import static clases.MessageEnum.SIGNUP;
 import clases.Usuario;
-import static com.sun.javafx.scene.control.skin.FXVK.Type.EMAIL;
 import excepciones.CheckSignInException;
-import java.net.Socket;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -70,7 +65,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
         MessageEnum Order;
 
         try {
-            c.setAutoCommit(false);
+            //c.setAutoCommit(false);
             c = Pool.getConnection();
 
             check = checkSignUp(usuario);
@@ -118,7 +113,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
                 statement.executeUpdate();
                 LOGGER.info("Usuario introducido en la tabla res_groups_users_rel");
 
-                c.commit();
+                //c.commit();
                 return MessageEnum.OK;
 
             } else if (check == 1) {
@@ -231,17 +226,22 @@ public class DaoImplementation implements InterfaceClienteServidor {
     }
 
     @Override
-    public Mensaje signIn(Mensaje respuesta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Mensaje signUp(Mensaje respuesta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void closeApli() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Mensaje signIn(Usuario us) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Mensaje signUp(Usuario us) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Mensaje conexion(Mensaje msj) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

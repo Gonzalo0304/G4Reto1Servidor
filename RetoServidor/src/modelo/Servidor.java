@@ -7,7 +7,6 @@ package modelo;
 
 import clases.Mensaje;
 import clases.MessageEnum;
-import excepciones.CheckSignUpException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -72,6 +71,14 @@ public class Servidor {
             }
         } catch (IOException ex) {
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+        }finally {
+            try {
+                oos.flush();
+                oos.close();
+                ois.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

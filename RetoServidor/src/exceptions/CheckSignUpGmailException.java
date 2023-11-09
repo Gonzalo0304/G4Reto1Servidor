@@ -6,14 +6,14 @@
 package exceptions;
 
 /**
+ * Esta es la excepcion para cuando al comprobar si el correo introducido ya existe da algun error
  *
  * @author Iñigo
  */
 public class CheckSignUpGmailException extends Exception {
-    
-      public CheckSignUpGmailException(String message) {
+
+    public CheckSignUpGmailException(String message) {
         super(message);
     }
-    
-    
+
 }

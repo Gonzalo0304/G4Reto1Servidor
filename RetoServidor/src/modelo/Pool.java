@@ -8,7 +8,6 @@ package modelo;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Stack;
 import java.util.logging.Logger;
@@ -33,7 +32,7 @@ public class Pool {
     //Singleton para que haya una sola instancia del pool
     private static Pool instance = null;
     
-    private Logger LOOGER = Logger.getLogger(Pool.class.getName());
+    private static Logger LOOGER = Logger.getLogger(Pool.class.getName());
 
     //Constructor privado para evitar instanciación directa
     /**
@@ -81,7 +80,7 @@ public class Pool {
      *
      * @param connection La conexión que se desea guardar en el pool.
      */
-    public void saveConnection(Connection connection) {
+    public static void saveConnection(Connection connection) {
         LOOGER.info("Guardando conexion");
         connections.add(connection);
     }
