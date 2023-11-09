@@ -54,8 +54,8 @@ public class Servidor {
             ServerSocket sk = new ServerSocket(PORT);
 
             while (isRunning) {
-                if (numUsers < MAXUSERS) {
-                    skU = sk.accept();
+                skU = sk.accept();
+                if (numUsers < MAXUSERS) {                    
                     LOGGER.info("Se ha conectado un usuario");
                     
                     WorkerThread workerThread = new WorkerThread(skU);
