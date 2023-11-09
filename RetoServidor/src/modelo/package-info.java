@@ -3,12 +3,4 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package controlador;
-
-/**
- *
- * @author Iñigo
- */
-public class OutputStream {
-    
-}
+package modelo;
