@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modelo;
+package controller;
 
 import clases.Mensaje;
 import clases.MessageEnum;
@@ -18,8 +18,9 @@ import java.util.logging.Logger;
 
 /**
  *
- * La clase `Servidor` representa un servidor que escucha y gestiona conexiones de clientes a través de sockets.
- * Los clientes se conectan al servidor y pueden interactuar con él mediante mensajes.
+ * La clase `Servidor` representa un servidor que escucha y gestiona conexiones
+ * de clientes a través de sockets. Los clientes se conectan al servidor y
+ * pueden interactuar con él mediante mensajes.
  *
  * @author Iñigo
  */
@@ -31,17 +32,20 @@ public class Servidor {
 
     final private Logger LOGGER = Logger.getLogger(ServerSocket.class.getName());
 
-    final private int PORT = Integer.parseInt(ResourceBundle.getBundle("modelo.connection").getString("port"));
-    final private int MAXUSERS = Integer.parseInt(ResourceBundle.getBundle("modelo.connection").getString("maxUser"));
+    final private int PORT = Integer.parseInt(ResourceBundle.getBundle("controller.connection").getString("port"));
+    final private int MAXUSERS = Integer.parseInt(ResourceBundle.getBundle("controller.connection").getString("maxUser"));
 
-     /**
-     * Inicia el servidor, permitiendo que los clientes se conecten y establezcan conexiones.
-     * Escucha en el puerto especificado y crea un hilo de trabajo para cada cliente que se conecta.
+    /**
+     * Inicia el servidor, permitiendo que los clientes se conecten y
+     * establezcan conexiones. Escucha en el puerto especificado y crea un hilo
+     * de trabajo para cada cliente que se conecta.
      *
-     * Este método es responsable de iniciar el servidor y esperar a que los clientes se conecten.
-     * Cuando un cliente se conecta, se crea un hilo de trabajo (WorkerThread) dedicado para ese cliente,
-     * lo que permite gestionar múltiples conexiones de manera simultánea.
-     * El número máximo de clientes conectados simultáneamente está limitado por la constante MAXUSERS.
+     * Este método es responsable de iniciar el servidor y esperar a que los
+     * clientes se conecten. Cuando un cliente se conecta, se crea un hilo de
+     * trabajo (WorkerThread) dedicado para ese cliente, lo que permite
+     * gestionar múltiples conexiones de manera simultánea. El número máximo de
+     * clientes conectados simultáneamente está limitado por la constante
+     * MAXUSERS.
      *
      */
     public void startServidor() {
@@ -51,17 +55,19 @@ public class Servidor {
 
         try {
             LOGGER.info("El servidor empieza a funcionar");
+            LOGGER.info("Para finalizar el servidor escribir finish");
             ServerSocket sk = new ServerSocket(PORT);
-
+            FinishThread finish = new FinishThread(sk);
+            finish.start();
             while (isRunning) {
                 skU = sk.accept();
-                if (numUsers < MAXUSERS) {                    
+                if (numUsers < MAXUSERS) {
                     LOGGER.info("Se ha conectado un usuario");
-                    
+
                     WorkerThread workerThread = new WorkerThread(skU);
                     connectUser(workerThread);
                     workerThread.start();
-                                        
+
                 } else {
                     oos = new ObjectOutputStream(skU.getOutputStream());
                     Mensaje mensaje = new Mensaje();
@@ -71,11 +77,14 @@ public class Servidor {
             }
         } catch (IOException ex) {
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-        }finally {
+        } finally {
             try {
-                oos.flush();
-                oos.close();
-                ois.close();
+                if (oos != null) {
+                    oos.flush();
+                    oos.close();
+                    ois.close();
+                }
+
             } catch (IOException ex) {
                 Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -96,6 +105,6 @@ public class Servidor {
 
     public static synchronized void disconnectUser(WorkerThread workerThread) {
         numUsers--;
-    }    
+    }
 
 }
