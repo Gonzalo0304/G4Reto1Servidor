@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modelo;
+package controller;
 
 import clases.InterfaceClienteServidor;
 import clases.Mensaje;
@@ -16,6 +16,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Factoria;
 
 /**
  * Esta clase representa un hilo de trabajo encargado de procesar solicitudes de

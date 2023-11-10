@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modelo;
+package controller;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -61,9 +61,9 @@ public class Pool {
 
         if (connections.isEmpty()) {
             LOOGER.info("Creando conexion");
-            String URL = ResourceBundle.getBundle("modelo.connection").getString("CONNECTION");
-            String USER = ResourceBundle.getBundle("modelo.connection").getString("DBUSER");
-            String PASSWORD = ResourceBundle.getBundle("modelo.connection").getString("DBPASS");
+            String URL = ResourceBundle.getBundle("controller.connection").getString("CONNECTION");
+            String USER = ResourceBundle.getBundle("controller.connection").getString("DBUSER");
+            String PASSWORD = ResourceBundle.getBundle("controller.connection").getString("DBPASS");
 
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
 
@@ -101,6 +101,10 @@ public class Pool {
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static void deleteConexions(){
+        connections.clear();
     }
 
 }

@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modelo;
+package model;
 
+import controller.Pool;
 import clases.InterfaceClienteServidor;
 import clases.Mensaje;
 import excepciones.CheckSignUpException;

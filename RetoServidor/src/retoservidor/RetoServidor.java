@@ -5,7 +5,7 @@
  */
 package retoservidor;
 
-import modelo.Servidor;
+import controller.Servidor;
 
 /**
  *
