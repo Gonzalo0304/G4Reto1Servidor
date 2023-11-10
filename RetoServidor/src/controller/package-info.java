@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package exceptions;
+package controller;
 /**
- * Paquete con la excepcion de servidor
+ * Paquete con los hilos, socket y pool del servidor
  */

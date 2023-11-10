@@ -50,14 +50,10 @@ public class DaoImplementation implements InterfaceClienteServidor {
      *
      * Inserta un nuevo usuario en el sistema.
      *
-     * @param skUsuario
-     * @param skUsuario El objeto `skUsuario` que representa al nuevo usuario a
-     * insertar.
+     * @param usuario que representa al nuevo usuario a insertar.
      * @return Un mensaje de estado (`MessageEnum`) que indica el resultado de
      * la inserción.
      * @throws excepciones.CheckSignUpException
-     * @throws SQLException * @throws SQLException Si se produce un error de
-     * base de datos durante la inserción.
      */
     @Override
     public MessageEnum insertUser(Usuario usuario) throws CheckSignUpException {
@@ -138,9 +134,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
      * está registrado.
      * @return Un entero que representa el estado de registro del usuario. 0 si
      * no está registrado, 1 si ya lo está.
-     * @throws excepciones.CheckSignInException
-     * @throws SQLException Si se produce un error de base de datos durante la
-     * verificación.
+     * @throws CheckSignUpException
      */
     @Override
     public Integer checkSignUp(Usuario usuario) throws CheckSignUpException {
