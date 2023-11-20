@@ -12,6 +12,7 @@ import excepciones.CheckSignUpException;
 import clases.MessageEnum;
 import clases.Usuario;
 import excepciones.CheckSignInException;
+import excepciones.PoolLlenoException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -30,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class DaoImplementation implements InterfaceClienteServidor {
 
-    final String INSETRESPARTNER = "INSERT INTO res_partner(create_date, name, create_uid, write_uid, street, zip, city, phone, active) VALUES(?,?,2,2,?,?,?,?,'true');";
+    final String INSETRESPARTNER = "INSERT INTO res_partner(create_date, name, create_uid, write_uid, street, zip, city, phone, mobile, active) VALUES(?,?,2,2,?,?,?,?,?,'true');";
     final String INSERTRESUSER = "INSERT INTO res_users(company_id, partner_id, create_date, login, password, create_uid, write_date, notification_type) VALUES(1,?,?,?,?,2,?,'email');";
     final String INSERTRESCOMP = "INSERT INTO res_company_users_rel (cid, user_id) VALUES (1,?);";
     final String INSERTRESGROUP = "INSERT INTO res_groups_users_rel (gid, uid) VALUES (16,?),(26,?),(28,?),(31,?);";
@@ -75,6 +76,7 @@ public class DaoImplementation implements InterfaceClienteServidor {
                 statement.setInt(4, usuario.getCodigoPostal());
                 statement.setString(5, usuario.getDireccion());
                 statement.setInt(6, usuario.getTelefono());
+                statement.setInt(7, 699475301);
                 statement.executeUpdate();
 
                 LOGGER.info("Usuario introducido en la tabla res_partner");
@@ -114,11 +116,13 @@ public class DaoImplementation implements InterfaceClienteServidor {
                 return MessageEnum.OK;
 
             } else if (check == 1) {
-                c.rollback();
-                throw new CheckSignUpException();
+                //c.rollback();
+                throw new CheckSignUpException("Usuario ya existente");
             }
 
         } catch (SQLException ex) {
+            Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (PoolLlenoException ex) {
             Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             Pool.saveConnection(c);
@@ -213,6 +217,9 @@ public class DaoImplementation implements InterfaceClienteServidor {
                 throw new CheckSignInException();
             }
         } catch (SQLException ex) {
+            Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (PoolLlenoException ex) {
+            ORDER = MessageEnum.ERRORSERVER;
             Logger.getLogger(DaoImplementation.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             Pool.saveConnection(c);

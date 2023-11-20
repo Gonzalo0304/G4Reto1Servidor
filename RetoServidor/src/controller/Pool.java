@@ -5,6 +5,7 @@
  */
 package controller;
 
+import excepciones.PoolLlenoException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -31,7 +32,7 @@ public class Pool {
 
     //Singleton para que haya una sola instancia del pool
     private static Pool instance = null;
-    
+
     private static Logger LOOGER = Logger.getLogger(Pool.class.getName());
 
     //Constructor privado para evitar instanciación directa
@@ -55,21 +56,27 @@ public class Pool {
      * @return Una conexión activa a la base de datos.
      * @throws SQLException Si se produce un error al establecer la conexión.
      */
-    public static synchronized Connection getConnection() throws SQLException {
+    public static synchronized Connection getConnection() throws PoolLlenoException, SQLException {
 
         Connection connection = null;
 
         if (connections.isEmpty()) {
+            if(connections.size() >=5){                
+               throw new PoolLlenoException("Maximo numero de conexiones creadas");
+            }else{
             LOOGER.info("Creando conexion");
             String URL = ResourceBundle.getBundle("controller.connection").getString("CONNECTION");
             String USER = ResourceBundle.getBundle("controller.connection").getString("DBUSER");
             String PASSWORD = ResourceBundle.getBundle("controller.connection").getString("DBPASS");
 
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        }
 
         } else {
+
             LOOGER.info("Asignando conexion");
             connection = connections.pop();
+
         }
         return connection;
     }
@@ -102,8 +109,8 @@ public class Pool {
             }
         }
     }
-    
-    public static void deleteConexions(){
+
+    public static void deleteConexions() {
         connections.clear();
     }
 
